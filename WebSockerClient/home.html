@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>WebSocker Client Test</title>
+<script type="text/javascript" src="alchemy-client.js"></script>
+<script type="text/javascript" src="modernizr-custom.js"></script>
+</head>
+<body>
+ <button type="button" id="btn">Connect</button> 
+<div id="status">Status: disconnected</div>
+<div id="ID">ID: null</div>
+<div id="ant_sx"></div>
+<div id="ant_dx"></div>
+<div id="post_sx"></div>
+<div id="post_dx"></div>
+<script>
+AlchemyChatServer = new Alchemy({ 
+	Server: "localhost",
+	Port: 81,
+	SocketType: 'websocket',
+	DebugMode: false
+});
+
+document.getElementById("ant_sx").innerHTML = "Anteriore sinistra: 0 kg";
+document.getElementById("ant_dx").innerHTML = "Anteriore destra: 0 kg";
+document.getElementById("post_sx").innerHTML = "Posteriore sinistra: 0 kg";
+document.getElementById("post_dx").innerHTML = "Posteriore destra: 0 kg";
+
+AlchemyChatServer.Connected = function(){
+	document.getElementById("status").innerHTML = "Status: connected";
+	console.log("\nconnected");
+	connected = true;
+	document.getElementById("btn").innerHTML = "Disconnect";
+	document.getElementById("ant_sx").innerHTML = "Anteriore sinistra: 0 kg";
+	document.getElementById("ant_dx").innerHTML = "Anteriore destra: 0 kg";
+	document.getElementById("post_sx").innerHTML = "Posteriore sinistra: 0 kg";
+	document.getElementById("post_dx").innerHTML = "Posteriore destra: 0 kg";
+};
+
+AlchemyChatServer.Disconnected = function(){
+	document.getElementById("status").innerHTML = "Status: disconnected";
+	console.log("\ndisconnected");
+	connected = false;
+	document.getElementById("btn").innerHTML = "Connect";
+	//document.getElementById("time").innerHTML = "";
+};
+
+AlchemyChatServer.MessageReceived = function(event){
+	console.log(event.data);
+	document.getElementById("ID").innerHTML = "ID: " + JSON.parse(event.data).ID;
+	document.getElementById("ant_sx").innerHTML = "Anteriore sinistra: " + JSON.parse(event.data).ant_sx + " kg";
+	document.getElementById("ant_dx").innerHTML = "Anteriore destra: " + JSON.parse(event.data).ant_dx + " kg";
+	document.getElementById("post_sx").innerHTML = "Posteriore sinistra: " + JSON.parse(event.data).post_sx + " kg";
+	document.getElementById("post_dx").innerHTML = "Posteriore destra: " + JSON.parse(event.data).post_dx + " kg";
+};
+
+connected = false;
+document.getElementById("btn").onclick = function() {
+	if(connected) {
+		//document.getElementById("btn").innerHTML = "Connect";
+		AlchemyChatServer.Stop();
+		//connected = false;
+	}
+	else
+	{
+		//document.getElementById("btn").innerHTML = "Disconnect";
+		AlchemyChatServer.Start();	
+		//connected = true;
+	}
+}
+</script>
+
+</body>
+</html> 
