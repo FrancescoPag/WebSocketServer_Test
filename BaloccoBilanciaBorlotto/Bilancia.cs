@@ -34,6 +34,7 @@ namespace BaloccoBilanciaBorlotto
             spBilancia.ReadTimeout = 30000;
             reads = new double[4,NUMERO_LETTURE];
             readAvailable = false;
+
         }
 
         static void Read()
