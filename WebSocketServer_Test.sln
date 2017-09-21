@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocketServer_Test", "Web
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BaloccoBilanciaBorlotto", "BaloccoBilanciaBorlotto\BaloccoBilanciaBorlotto.csproj", "{823381A5-AD9A-46C8-B30A-DA48BC27B162}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsFormsApplication1", "WindowsFormsApplication1\WindowsFormsApplication1.csproj", "{802115B6-5F80-455A-9228-4F6F1978C3B0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{823381A5-AD9A-46C8-B30A-DA48BC27B162}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{823381A5-AD9A-46C8-B30A-DA48BC27B162}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{823381A5-AD9A-46C8-B30A-DA48BC27B162}.Release|Any CPU.Build.0 = Release|Any CPU
+		{802115B6-5F80-455A-9228-4F6F1978C3B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{802115B6-5F80-455A-9228-4F6F1978C3B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{802115B6-5F80-455A-9228-4F6F1978C3B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{802115B6-5F80-455A-9228-4F6F1978C3B0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

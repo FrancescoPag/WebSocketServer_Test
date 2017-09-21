@@ -11,6 +11,11 @@ using Newtonsoft.Json;
 
 namespace WebSocketServer_Test
 {
+    enum Mode
+    {
+        Bilancia = 0,
+        Borlotto = 1
+    }
     class Server
     {
         static int clientCount = 0;
@@ -25,14 +30,16 @@ namespace WebSocketServer_Test
             {
                 OnConnected = OnConnected,
                 OnDisconnect = OnDisconnect,
+                OnReceive = OnReceive,
+                OnSend = OnSend,
                 TimeOut = new TimeSpan(0, 5, 0)
             };
 
-            Console.WriteLine("Listening on port 81");
+            Console.WriteLine("Listening on port 81 [Thread:" + Thread.CurrentThread.ManagedThreadId + "]");
             new Thread(new ThreadStart(() =>
             {
                 aServer.Start();
-
+                Console.WriteLine("Server started [Thread:" + Thread.CurrentThread.ManagedThreadId + "]");
                 var command = string.Empty;
                 while (command != "exit")
                 {
@@ -49,18 +56,41 @@ namespace WebSocketServer_Test
         {
             lock(connectedUsers)
             {
-                Console.WriteLine("Client Connection From : " + aContext.ClientAddress.ToString() + " [ID:" + clientCount + "]");// [HostName: " + Dns.GetHostEntry(aContext.ClientAddress.ToString().).HostName + "]");
+                Console.WriteLine("Client Connection From : " + aContext.ClientAddress.ToString() + " [ID:" + clientCount + "] [Thread:" + Thread.CurrentThread.ManagedThreadId + "]");// [HostName: " + Dns.GetHostEntry(aContext.ClientAddress.ToString().).HostName + "]");
                 connectedUsers.Add(aContext, clientCount++);
                 Console.WriteLine(Dns.GetHostEntry(((IPEndPoint)aContext.ClientAddress).Address.ToString()).HostName);
                 //clientCount++;
             }
             //Task.Run(() => SendTimeAsync(aContext));
-            Task.Run(() => SendWeights(aContext));
             //Echo(aContext);
             //user = aContext;
+
+            Task.Run(() => SendWeights(aContext));
         }
 
-        static async Task printAsync(String s)
+        static void OnSend(UserContext aContext)
+        {
+            Console.WriteLine("Msg sent [Thread:" + Thread.CurrentThread.ManagedThreadId + "]");
+        }
+
+        static void OnReceive(UserContext aContext)
+        {
+            try
+            {
+                //var json = ;
+                Console.WriteLine("MsgReceived: " + aContext.DataFrame.ToString() + "[Thread:" + Thread.CurrentThread.ManagedThreadId + "]");
+                //dynamic obj = JsonConvert.DeserializeObject(json);
+                //Console.WriteLine((string)obj);
+            }
+            catch (Exception e) // Bad JSON! For shame.
+            {
+                Console.WriteLine("Error: " + e.Message);
+            }
+        }
+
+
+
+            static async Task printAsync(String s)
         {
             lock (_lock) { Console.WriteLine(s); };
         }
@@ -70,8 +100,10 @@ namespace WebSocketServer_Test
             lock (connectedUsers)
             {
                 int id;
-                connectedUsers.TryGetValue(aContext, out id);
-                Console.WriteLine("Client Disconnect : " + aContext.ClientAddress.ToString() + " [ID:" + id + "]");
+                if(connectedUsers.TryGetValue(aContext, out id))
+                    Console.WriteLine("Client Disconnect : " + aContext.ClientAddress.ToString() + " [ID:" + id + "] [Thread:" + Thread.CurrentThread.ManagedThreadId + "]");
+                else
+                    Console.WriteLine("Client Disconnect : " + aContext.ClientAddress.ToString() + " [ID: NULL] [Thread:" + Thread.CurrentThread.ManagedThreadId + "]");
                 connectedUsers.Remove(aContext);
             }
             //user = null;
@@ -127,7 +159,6 @@ namespace WebSocketServer_Test
                     user.Send(echo);
             }
         }
-
     }
 
     class Weights
