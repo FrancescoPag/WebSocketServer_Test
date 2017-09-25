@@ -30,6 +30,17 @@ namespace WindowsFormsApplication1
             MenuItem miOpen = new MenuItem("Mostra", new EventHandler((caller, args) => { this.Show(); }));
             ContextMenu cm = new ContextMenu(new MenuItem[] { miOpen, miClose });
             notifyIcon.ContextMenu = cm;
+
+            //BindingList<string> bl = new BindingList<string>(System.IO.Ports.SerialPort.GetPortNames());
+            //cbBilanciaPort.DataSource = System.IO.Ports.SerialPort.GetPortNames();
+            //cbBorlottoPort.DataSource = System.IO.Ports.SerialPort.GetPortNames();
+            BindingSource bs = new BindingSource();
+            List<string> portNames = System.IO.Ports.SerialPort.GetPortNames().ToList();
+            portNames.Add("COM1000");
+            portNames.Add("COM6281");
+            bs.DataSource = portNames;
+            cbBilanciaPort.DataSource = bs;
+            
         }
 
         private void btnRun_Click(object sender, EventArgs e)
@@ -46,6 +57,7 @@ namespace WindowsFormsApplication1
         {
             LoadRunningStatus(BilanciaBorlotto.IsRunning);
             //Task.Run(() => BilanciaBorlotto.Start());
+
             this.Hide();
         }
 

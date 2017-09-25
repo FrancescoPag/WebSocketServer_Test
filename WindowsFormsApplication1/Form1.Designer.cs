@@ -32,7 +32,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.lblStatus = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.cmBilanciaPort = new System.Windows.Forms.ComboBox();
+            this.cbBilanciaPort = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
             this.cbBorlottoPort = new System.Windows.Forms.ComboBox();
             this.btnRun = new System.Windows.Forms.Button();
@@ -69,13 +69,13 @@
             this.label3.TabIndex = 2;
             this.label3.Text = "Bilancia";
             // 
-            // cmBilanciaPort
+            // cbBilanciaPort
             // 
-            this.cmBilanciaPort.FormattingEnabled = true;
-            this.cmBilanciaPort.Location = new System.Drawing.Point(95, 62);
-            this.cmBilanciaPort.Name = "cmBilanciaPort";
-            this.cmBilanciaPort.Size = new System.Drawing.Size(121, 21);
-            this.cmBilanciaPort.TabIndex = 3;
+            this.cbBilanciaPort.FormattingEnabled = true;
+            this.cbBilanciaPort.Location = new System.Drawing.Point(95, 62);
+            this.cbBilanciaPort.Name = "cbBilanciaPort";
+            this.cbBilanciaPort.Size = new System.Drawing.Size(121, 21);
+            this.cbBilanciaPort.TabIndex = 3;
             // 
             // label4
             // 
@@ -148,7 +148,7 @@
             this.Controls.Add(this.btnRun);
             this.Controls.Add(this.cbBorlottoPort);
             this.Controls.Add(this.label4);
-            this.Controls.Add(this.cmBilanciaPort);
+            this.Controls.Add(this.cbBilanciaPort);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.label1);
@@ -166,7 +166,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.ComboBox cmBilanciaPort;
+        private System.Windows.Forms.ComboBox cbBilanciaPort;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox cbBorlottoPort;
         private System.Windows.Forms.Button btnRun;

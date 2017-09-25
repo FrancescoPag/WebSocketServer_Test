@@ -166,7 +166,7 @@ namespace BaloccoBilanciaBorlotto
 
         private static void OnConnect(UserContext user)
         {
-            user.
+            //user.
             Log(LogLevel.Info, user.ClientAddress.ToString() + " connected");
         }
 
