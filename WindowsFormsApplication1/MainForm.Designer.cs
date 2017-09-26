@@ -1,6 +1,6 @@
 ﻿namespace WindowsFormsApplication1
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// Required designer variable.
@@ -130,6 +130,7 @@
             this.btnSettings.TabIndex = 9;
             this.btnSettings.Text = "Impostazioni avanzate";
             this.btnSettings.UseVisualStyleBackColor = true;
+            this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
             // 
             // notifyIcon
             // 
@@ -153,7 +154,7 @@
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.label1);
             this.Name = "Form1";
-            this.Text = "BaloccoBilanciaBorlotto";
+            this.Text = "BilanciaBorlotto";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);

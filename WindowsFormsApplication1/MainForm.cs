@@ -11,18 +11,33 @@ using System.Windows.Forms;
 
 namespace WindowsFormsApplication1
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         private bool forceClosing = false;
-        public Form1()
+        private BilanciaBorlotto _bilanciaBorlotto = null;
+        private SettingsForm _settingsForm = null;
+
+        public MainForm()
         {
             InitializeComponent();
-            BilanciaBorlotto.RunEvent += LoadRunningStatus;
+            _bilanciaBorlotto = new BilanciaBorlotto(Program.Settings.bilanciaSettings);
+            _bilanciaBorlotto.RunEvent += LoadRunningStatus;
+
+            // TODO gestione cambiamento settings?
+            Program.SettingsChanged += () =>    
+            {
+                Task.Run(() => 
+                {
+                    bool wasRunning = _bilanciaBorlotto.IsRunning;
+                    this._bilanciaBorlotto.Stop();
+                    if (wasRunning) _bilanciaBorlotto.Start(Program.Settings.serverPort);
+                });
+            };
 
             notifyIcon.Icon = Properties.Resources.WebSocketsLogo;
             MenuItem miClose = new MenuItem("Termina", new EventHandler(async (caller, args) =>
             {
-                await Task.Run(() => BilanciaBorlotto.Stop());
+                await Task.Run(() => this._bilanciaBorlotto.Stop());
                 forceClosing = true;
                 this.Close();
                 Application.Exit();
@@ -45,17 +60,17 @@ namespace WindowsFormsApplication1
 
         private void btnRun_Click(object sender, EventArgs e)
         {
-            if (BilanciaBorlotto.IsRunning)
-                Task.Run(() => BilanciaBorlotto.Stop());
+            if (_bilanciaBorlotto.IsRunning)
+                Task.Run(() => _bilanciaBorlotto.Stop());
             else
-                Task.Run(() => BilanciaBorlotto.Start());
+                Task.Run(() => _bilanciaBorlotto.Start(Program.Settings.serverPort));
             btnRun.Enabled = false;
         }
 
         #region Form Events
         private void Form1_Load(object sender, EventArgs e)
         {
-            LoadRunningStatus(BilanciaBorlotto.IsRunning);
+            LoadRunningStatus(_bilanciaBorlotto.IsRunning);
             //Task.Run(() => BilanciaBorlotto.Start());
 
             this.Hide();
@@ -84,7 +99,7 @@ namespace WindowsFormsApplication1
                 {
                     if (isRunning)
                     {
-                        lblStatus.Text = "Running";
+                        lblStatus.Text = $"Running (Port {_bilanciaBorlotto.WebSocketServerPort})";
                         btnRun.Text = "Stop";
                         notifyIcon.Text = "BilanciaBorlotto - Running";
                     }
@@ -121,5 +136,16 @@ namespace WindowsFormsApplication1
             this.Show();
         }
 
+        private void btnSettings_Click(object sender, EventArgs e)
+        {
+            if (_settingsForm == null)
+            {
+                _settingsForm = new SettingsForm();
+                _settingsForm.FormClosed += ((s, ea) => _settingsForm = null);
+                _settingsForm.Show();
+            }
+            else
+                _settingsForm.BringToFront();
+        }
     }
 }

@@ -38,21 +38,36 @@ namespace BaloccoBilanciaBorlotto
         }
     }
 
+    [Serializable]
     public class BilanciaSettings
     {
-        public int NUMERO_LETTURE = 3;
-        public int TIMER_MS = 200;
+        public int LetturePerMedia = 3;
+        public int FrequenzaLettura = 200;
 
-        public double CORREZIONE_ANT_SX = 1.0;
-        public double CORREZIONE_ANT_DX = 1.0;
-        public double CORREZIONE_POST_SX = 1.0;
-        public double CORREZIONE_POST_DX = 1.0;
+        public double CorrezioneAntSx = 1.0;
+        public double CorrezioneAntDx = 1.0;
+        public double CorrezionePostSx = 1.0;
+        public double CorrezionePostDx = 1.0;
 
-        public int PORTA_COM = 1;
-        public int BAUD_RATE = 9600;
-        public Parity PARITY_BIT = Parity.None;
-        public int DATA_BITS = 8;
-        public StopBits STOP_BITS = StopBits.One;
+        public int PortaCom = 1;
+        public int BaudRate = 9600;
+        public Parity ParityBit = Parity.None;
+        public int DataBits = 8;
+        public StopBits StopBits = StopBits.One;
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+            BilanciaSettings other = obj as BilanciaSettings;
+            if (other == null)
+                return false;
+            return this.LetturePerMedia == other.LetturePerMedia && this.FrequenzaLettura == other.FrequenzaLettura
+                && this.CorrezioneAntDx == other.CorrezioneAntDx && this.CorrezioneAntSx == other.CorrezioneAntSx
+                && this.CorrezionePostDx == other.CorrezionePostDx && this.CorrezionePostSx == other.CorrezionePostSx
+                && this.BaudRate == other.BaudRate && this.DataBits == other.DataBits
+                && this.ParityBit == other.ParityBit && this.StopBits == other.StopBits;
+        }
     }
     #endregion
 
@@ -157,8 +172,8 @@ namespace BaloccoBilanciaBorlotto
             this._readBuffer = new char[SERIAL_PORT_BUFFER_SIZE + 1];
             this._lastReads = new FifoList[4];
             for (int i = 0; i < _lastReads.Length; ++i)
-                _lastReads[i] = new FifoList(settings.NUMERO_LETTURE);
-            this._serialPort = new SerialPort("COM" + settings.PORTA_COM.ToString(), settings.BAUD_RATE, settings.PARITY_BIT, settings.DATA_BITS, settings.STOP_BITS);
+                _lastReads[i] = new FifoList(settings.LetturePerMedia);
+            this._serialPort = new SerialPort("COM" + settings.PortaCom.ToString(), settings.BaudRate, settings.ParityBit, settings.DataBits, settings.StopBits);
             this._isStopped = true;
             this._productQueue = new BilanciaProductQueue();
             this._settings = settings;
@@ -179,7 +194,7 @@ namespace BaloccoBilanciaBorlotto
                             //Produce();
                             PseudoProduce();
                             //await Task.Delay(_settings.TIMER_MS * 10);
-                            Thread.Sleep(_settings.TIMER_MS * 10);
+                            Thread.Sleep(_settings.FrequenzaLettura * 10);
                         }
                         for(int i = 0; i < _lastReads.Length; ++i)
                             _lastReads[i].Clear();
@@ -208,10 +223,10 @@ namespace BaloccoBilanciaBorlotto
 
                 if (!_isStopped && readCount >= 32)
                 {
-                    _lastReads[(int)Tire.ANT_SX].Insert(_settings.CORREZIONE_ANT_SX * int.Parse(new string(_readBuffer, 4, 6)));
-                    _lastReads[(int)Tire.ANT_DX].Insert(_settings.CORREZIONE_ANT_DX * int.Parse(new string(_readBuffer, 11, 6)));
-                    _lastReads[(int)Tire.POST_SX].Insert(_settings.CORREZIONE_POST_SX * int.Parse(new string(_readBuffer, 18, 6)));
-                    _lastReads[(int)Tire.POST_DX].Insert(_settings.CORREZIONE_POST_DX * int.Parse(new string(_readBuffer, 25, 6)));
+                    _lastReads[(int)Tire.ANT_SX].Insert(_settings.CorrezioneAntSx * int.Parse(new string(_readBuffer, 4, 6)));
+                    _lastReads[(int)Tire.ANT_DX].Insert(_settings.CorrezioneAntDx * int.Parse(new string(_readBuffer, 11, 6)));
+                    _lastReads[(int)Tire.POST_SX].Insert(_settings.CorrezionePostSx * int.Parse(new string(_readBuffer, 18, 6)));
+                    _lastReads[(int)Tire.POST_DX].Insert(_settings.CorrezionePostDx * int.Parse(new string(_readBuffer, 25, 6)));
 
                     if (_lastReads[0].IsFull && _lastReads[1].IsFull && _lastReads[2].IsFull && _lastReads[3].IsFull)
                         _productQueue.SetProduct(_lastReads[(int)Tire.ANT_SX].Average, _lastReads[(int)Tire.ANT_DX].Average, _lastReads[(int)Tire.POST_SX].Average, _lastReads[(int)Tire.POST_DX].Average);
@@ -232,10 +247,10 @@ namespace BaloccoBilanciaBorlotto
             BilanciaBorlotto.Log(LogLevel.Trace, "bilancia is pseudo-producing");
             if (!_isStopped)
             {
-                _lastReads[(int)Tire.ANT_SX].Insert(_settings.CORREZIONE_ANT_SX * rand.Next(80,120));
-                _lastReads[(int)Tire.ANT_DX].Insert(_settings.CORREZIONE_ANT_DX * rand.Next(180,220));
-                _lastReads[(int)Tire.POST_SX].Insert(_settings.CORREZIONE_POST_SX * rand.Next(280,320));
-                _lastReads[(int)Tire.POST_DX].Insert(_settings.CORREZIONE_POST_DX * rand.Next(380,420));
+                _lastReads[(int)Tire.ANT_SX].Insert(_settings.CorrezioneAntSx * rand.Next(80,120));
+                _lastReads[(int)Tire.ANT_DX].Insert(_settings.CorrezioneAntDx * rand.Next(180,220));
+                _lastReads[(int)Tire.POST_SX].Insert(_settings.CorrezionePostSx * rand.Next(280,320));
+                _lastReads[(int)Tire.POST_DX].Insert(_settings.CorrezionePostDx * rand.Next(380,420));
 
                 if (_lastReads[0].IsFull && _lastReads[1].IsFull && _lastReads[2].IsFull && _lastReads[3].IsFull)
                     _productQueue.SetProduct(_lastReads[(int)Tire.ANT_SX].Average, _lastReads[(int)Tire.ANT_DX].Average, _lastReads[(int)Tire.POST_SX].Average, _lastReads[(int)Tire.POST_DX].Average);

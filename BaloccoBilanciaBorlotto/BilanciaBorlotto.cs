@@ -13,89 +13,87 @@ using System.Threading.Tasks;
 
 namespace BaloccoBilanciaBorlotto
 {
-    public delegate void RunEventDelegate(bool isRunning);
     public class BilanciaBorlotto
     {
-        private const int WEB_SOCKET_SERVER_PORT = 81;
+        public int WebSocketServerPort { get; private set; }
         private static Logger logger = LogManager.GetLogger("myLogger");
          
-        private static HashSet<UserContext> _bilanciaUsers, _borlottoUsers;
-        private static object _lockBilancia, _lockBorlotto;
-        private static Thread _thServer, _thBilanciaConsumer, _thBorlottoConsumer;
-        private static AutoResetEvent _stopServerEvent;
-        private static volatile bool _run, _runBilancia, _runBorlotto;
-        private static BilanciaProducer _bilanciaProducer;
+        private HashSet<UserContext> _bilanciaUsers, _borlottoUsers;
+        private object _lockBilancia, _lockBorlotto;
+        private WebSocketServer _wsServer;
+        private Thread _thServer, _thBilanciaConsumer, _thBorlottoConsumer;
+        private AutoResetEvent _stopServerEvent;
+        private volatile bool _run, _runBilancia, _runBorlotto;
+        private BilanciaProducer _bilanciaProducer;
         
-        public static bool IsRunning { get { return _run; } }
-        public static RunEventDelegate RunEvent;  
+        public bool IsRunning { get { return _run; } }
+        public Action<bool> RunEvent;  
        
-        static BilanciaBorlotto()
+        public BilanciaBorlotto(BilanciaSettings settings)
         {
             _run = false;
             _bilanciaUsers = new HashSet<UserContext>();
             _borlottoUsers = new HashSet<UserContext>();
             _lockBilancia = new object();
             _lockBorlotto = new object();
-            _bilanciaProducer = new BilanciaProducer(new BilanciaSettings());
+            _bilanciaProducer = new BilanciaProducer(settings);
             _stopServerEvent = new AutoResetEvent(false);
-        }
 
-        public static void Main(string[] args)
-        {
-            Start();
-        }
-
-        public static void Start()
-        {
-            if (_run) return;
-
-            //_bilanciaUsers = new HashSet<UserContext>();
-            //_borlottoUsers = new HashSet<UserContext>();
-            //_lockBilancia = new object();
-            //_lockBorlotto = new object();
-            //_stopServerEvent = new AutoResetEvent(false);
-            _run = true;
-            _runBilancia = false;
-            _runBorlotto = false;
-            //_bilanciaProducer = new BilanciaProducer(new BilanciaSettings());  
-            _stopServerEvent.Reset();        
-
-            WebSocketServer wsServer = new WebSocketServer(WEB_SOCKET_SERVER_PORT, IPAddress.Loopback)
+            _wsServer = new WebSocketServer(WebSocketServerPort, IPAddress.Loopback)
             {
                 OnConnected = OnConnect,
                 OnDisconnect = OnDisconnect,
                 OnReceive = OnReceive,
+                //FlashAccessPolicyEnabled = false,
                 TimeOut = new TimeSpan(10, 0, 0)
             };
+        }
 
+        public static void Main(string[] args)
+        {
+            BilanciaBorlotto bb = new BilanciaBorlotto(new BilanciaSettings());
+            bb.Start(81);
+
+            Thread thGUI = new Thread(() =>    // Thread "gui"
+            {
+                Log(LogLevel.Debug, "started");
+                String s = String.Empty;
+                while (!s.Equals("exit"))
+                    s = Console.ReadLine();
+
+                // chiudi tutto
+                bb._run = false;
+                bb.RemoveAllBilanciaUsers();
+                bb.RemoveAllBorlottoUsers();
+
+                bb._stopServerEvent.Set();
+                Log(LogLevel.Debug, "stopped");
+            });
+            thGUI.Name = "GUI";
+            thGUI.Start();
+
+        }
+
+        public void Start(int serverPort)
+        {
+            if (_run) return;
+
+            _run = true;
+            _runBilancia = false;
+            _runBorlotto = false;
+            WebSocketServerPort = serverPort;
+            _stopServerEvent.Reset();
+
+            _wsServer.Port = WebSocketServerPort;
             _thServer = new Thread(() =>
                 {
                     Log(LogLevel.Debug, "started");
-                    wsServer.Start();
+                    _wsServer.Start();
                     _stopServerEvent.WaitOne();
-                    wsServer.Stop();
+                    _wsServer.Stop();
                     Log(LogLevel.Debug, "stopped");
                 });
             _thServer.Name = "Listener";
-            
-            
-            Thread thGUI = new Thread(() =>    // Thread "gui"
-                {
-                    Log(LogLevel.Debug, "started");
-                    String s = String.Empty;
-                    while (!s.Equals("exit"))
-                        s = Console.ReadLine();
-
-                    // chiudi tutto
-                    _run = false;
-                    RemoveAllBilanciaUsers();
-                    RemoveAllBorlottoUsers();
-
-                    _stopServerEvent.Set();
-                    Log(LogLevel.Debug, "stopped");
-                });
-            thGUI.Name = "GUI";
-            
 
             _thBilanciaConsumer = new Thread(() =>    // Thread consumatore per bilancia
                 {
@@ -130,19 +128,13 @@ namespace BaloccoBilanciaBorlotto
                 });
             _thBilanciaConsumer.Name = "BilanciaConsumer";
 
-            thGUI.Start();
             _thServer.Start();
             _thBilanciaConsumer.Start();
-            if(RunEvent != null) RunEvent(_run);
+            if (RunEvent != null) RunEvent(_run);
             Log(LogLevel.Debug, "BilanciaBorlotto started");
-
-            thGUI.Join();
-            _thServer.Join();
-            _thBilanciaConsumer.Join();
-            Console.ReadLine();
         }
 
-        public static void Stop()
+        public void Stop()
         {
             if (!_run) return;
 
@@ -164,13 +156,13 @@ namespace BaloccoBilanciaBorlotto
             Log(LogLevel.Debug, " BilanciaBorlotto stopped");
         }
 
-        private static void OnConnect(UserContext user)
+        private void OnConnect(UserContext user)
         {
             //user.
             Log(LogLevel.Info, user.ClientAddress.ToString() + " connected");
         }
 
-        private static void OnReceive(UserContext user)
+        private void OnReceive(UserContext user)
         {
             String msg = user.DataFrame.ToString();
             if(!msg.Contains("\n"))
@@ -189,7 +181,7 @@ namespace BaloccoBilanciaBorlotto
             //log
         }
 
-        private static void OnDisconnect(UserContext user)
+        private void OnDisconnect(UserContext user)
         {
             Log(LogLevel.Info, user.ClientAddress.ToString() + " disconnected");
             RemoveBorlottoUser(user);
@@ -197,7 +189,7 @@ namespace BaloccoBilanciaBorlotto
             //log
         }
 
-        private static bool RemoveBorlottoUser(UserContext user)
+        private bool RemoveBorlottoUser(UserContext user)
         {
             bool ret = false;
             lock (_lockBorlotto)
@@ -216,7 +208,7 @@ namespace BaloccoBilanciaBorlotto
             return ret;
         }
 
-        private static void AddBorlottoUser(UserContext user)
+        private void AddBorlottoUser(UserContext user)
         {
             lock (_lockBorlotto)
             {
@@ -233,7 +225,7 @@ namespace BaloccoBilanciaBorlotto
             }
         }
 
-        private static void RemoveAllBorlottoUsers()
+        private void RemoveAllBorlottoUsers()
         {
             lock (_lockBorlotto)
             {
@@ -244,7 +236,7 @@ namespace BaloccoBilanciaBorlotto
             }
         }
 
-        private static bool RemoveBilanciaUser(UserContext user)
+        private bool RemoveBilanciaUser(UserContext user)
         {
             bool ret = false;
             lock (_lockBilancia)
@@ -263,7 +255,7 @@ namespace BaloccoBilanciaBorlotto
             return ret;
         }
 
-        private static void AddBilanciaUser(UserContext user)
+        private void AddBilanciaUser(UserContext user)
         {
             lock (_lockBilancia)
             {
@@ -280,7 +272,7 @@ namespace BaloccoBilanciaBorlotto
             }            
         }
 
-        private static void RemoveAllBilanciaUsers()
+        private void RemoveAllBilanciaUsers()
         {
             lock (_lockBilancia)
             {
