@@ -13,10 +13,10 @@ namespace WindowsFormsApplication1
     {
         private static readonly string FILE_NAME = "config.dat";
         public static Settings Default { get; private set; }
-        public BilanciaSettings bilanciaSettings;
-        public bool autoStart;
-        public int serverPort;
-        public string logFileName;
+        public BilanciaSettings BilanciaSettings;
+        public bool AutoStart;
+        public int ServerPort;
+        //public string logFileName;
         
         static Settings()
         {
@@ -25,10 +25,10 @@ namespace WindowsFormsApplication1
 
         private Settings()
         {
-            bilanciaSettings = new BilanciaSettings();
-            autoStart = true;
-            serverPort = 81;
-            logFileName = "log.txt";
+            BilanciaSettings = new BilanciaSettings();
+            AutoStart = true;
+            ServerPort = 81;
+            //logFileName = "log.txt";
         }
 
         public static Settings Load(bool loadDefault = false)

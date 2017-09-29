@@ -49,7 +49,7 @@ namespace BaloccoBilanciaBorlotto
         public double CorrezionePostSx = 1.0;
         public double CorrezionePostDx = 1.0;
 
-        public int PortaCom = 1;
+        public string PortaCom = "COM1";
         public int BaudRate = 9600;
         public Parity ParityBit = Parity.None;
         public int DataBits = 8;
@@ -59,10 +59,13 @@ namespace BaloccoBilanciaBorlotto
         {
             if (obj == null)
                 return false;
+
             BilanciaSettings other = obj as BilanciaSettings;
             if (other == null)
                 return false;
-            return this.LetturePerMedia == other.LetturePerMedia && this.FrequenzaLettura == other.FrequenzaLettura
+
+            return this.PortaCom.Equals(other.PortaCom)
+                && this.LetturePerMedia == other.LetturePerMedia && this.FrequenzaLettura == other.FrequenzaLettura
                 && this.CorrezioneAntDx == other.CorrezioneAntDx && this.CorrezioneAntSx == other.CorrezioneAntSx
                 && this.CorrezionePostDx == other.CorrezionePostDx && this.CorrezionePostSx == other.CorrezionePostSx
                 && this.BaudRate == other.BaudRate && this.DataBits == other.DataBits
@@ -92,7 +95,6 @@ namespace BaloccoBilanciaBorlotto
         private double _antSx, _antDx, _postSx, _postDx;
         private readonly object _lock;
         private AutoResetEvent _newProductEvent;
-
 
         public BilanciaProductQueue()
         {
@@ -173,7 +175,7 @@ namespace BaloccoBilanciaBorlotto
             this._lastReads = new FifoList[4];
             for (int i = 0; i < _lastReads.Length; ++i)
                 _lastReads[i] = new FifoList(settings.LetturePerMedia);
-            this._serialPort = new SerialPort("COM" + settings.PortaCom.ToString(), settings.BaudRate, settings.ParityBit, settings.DataBits, settings.StopBits);
+            this._serialPort = new SerialPort(settings.PortaCom, settings.BaudRate, settings.ParityBit, settings.DataBits, settings.StopBits);
             this._isStopped = true;
             this._productQueue = new BilanciaProductQueue();
             this._settings = settings;
@@ -259,11 +261,12 @@ namespace BaloccoBilanciaBorlotto
 
         public void Stop()
         {
-            BilanciaBorlotto.Log(LogLevel.Debug, "stopping bilancia producer");
+            BilanciaBorlotto.Log(LogLevel.Debug, "called bilancia producer stop");
             _isStopped = true;
             _productQueue.Close();
-            //_thread.Join();
+            _thread.Join();
             _thread = null;
+            BilanciaBorlotto.Log(LogLevel.Debug, "bilancia producer stopped");
         }
 
         public BilanciaProduct GetProduct()

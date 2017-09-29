@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BaloccoBilanciaBorlotto", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsFormsApplication1", "WindowsFormsApplication1\WindowsFormsApplication1.csproj", "{802115B6-5F80-455A-9228-4F6F1978C3B0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FleckTest", "FleckTest\FleckTest.csproj", "{ED05FDB6-0923-4AC3-8640-9E4902CE36AD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{802115B6-5F80-455A-9228-4F6F1978C3B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{802115B6-5F80-455A-9228-4F6F1978C3B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{802115B6-5F80-455A-9228-4F6F1978C3B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED05FDB6-0923-4AC3-8640-9E4902CE36AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED05FDB6-0923-4AC3-8640-9E4902CE36AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED05FDB6-0923-4AC3-8640-9E4902CE36AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED05FDB6-0923-4AC3-8640-9E4902CE36AD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

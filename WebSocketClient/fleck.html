@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>WebSocket Client Test - Alchemy</title>
+<title>WebSocket Client Test - Fleck</title>
 <script type="text/javascript" src="alchemy-client.js"></script>
 <script type="text/javascript" src="modernizr-custom.js"></script>
 </head>
@@ -20,13 +20,7 @@
 <div id="post_sx2"></div>
 <div id="post_dx2"></div>
 <script>
-AlchemyServer = new Alchemy({ 
-	Server: "localhost",
-	Port: 81,
-	SocketType: 'websocket',
-	DebugMode: false
-});
-	
+var socket;
 document.getElementById("ant_sx").innerHTML = "PESO Anteriore sinistra: 0 kg";
 document.getElementById("ant_dx").innerHTML = "PESO Anteriore destra: 0 kg";
 document.getElementById("post_sx").innerHTML = "PESO Posteriore sinistra: 0 kg";
@@ -37,66 +31,19 @@ document.getElementById("ant_dx2").innerHTML = "BORLOTTO Anteriore destra: 0";
 document.getElementById("post_sx2").innerHTML = "BORLOTTO Posteriore sinistra: 0";
 document.getElementById("post_dx2").innerHTML = "BORLOTTO Posteriore destra: 0";
 
-AlchemyServer.Connected = function(){
-	document.getElementById("status").innerHTML = "Status: connected";
-	console.log("\nconnected");
-	connected = true;
-	document.getElementById("btn").disabled = false;
-	document.getElementById("btn").innerHTML = "Disconnect";
-	document.getElementById("ant_sx").innerHTML = "PESO Anteriore sinistra: 0 kg";
-	document.getElementById("ant_dx").innerHTML = "PESO Anteriore destra: 0 kg";
-	document.getElementById("post_sx").innerHTML = "PESO Posteriore sinistra: 0 kg";
-	document.getElementById("post_dx").innerHTML = "PESO Posteriore destra: 0 kg";
-	document.getElementById("ant_sx2").innerHTML = "BORLOTTO Anteriore sinistra: 0";
-	document.getElementById("ant_dx2").innerHTML = "BORLOTTO Anteriore destra: 0";
-	document.getElementById("post_sx2").innerHTML = "BORLOTTO Posteriore sinistra: 0";
-	document.getElementById("post_dx2").innerHTML = "BORLOTTO Posteriore destra: 0";
-};
-
-AlchemyServer.Disconnected = function(){
-	document.getElementById("status").innerHTML = "Status: disconnected";
-	console.log("\ndisconnected");
-	connected = false;
-	document.getElementById("btn").innerHTML = "Connect";
-	document.getElementById("btn").disabled = false;
-	//document.getElementById("time").innerHTML = "";
-};
-
-AlchemyServer.MessageReceived = function(event){
-	console.log(event.data);
-	//document.getElementById("ID").innerHTML = "ID: " + JSON.parse(event.data).ID;
-	if(JSON.parse(event.data).borlotto) {
-		document.getElementById("ant_sx2").innerHTML = "BORLOTTO Anteriore sinistra: 1";
-		document.getElementById("ant_dx2").innerHTML = "BORLOTTO Anteriore destra: 1";
-		document.getElementById("post_sx2").innerHTML = "BORLOTTO Posteriore sinistra: 1";
-		document.getElementById("post_dx2").innerHTML = "BORLOTTO Posteriore destra: 1";
-	}
-	else {
-		document.getElementById("ant_sx").innerHTML = "PESO Anteriore sinistra: " + JSON.parse(event.data).ant_sx + " kg";
-		document.getElementById("ant_dx").innerHTML = "PESO Anteriore destra: " + JSON.parse(event.data).ant_dx + " kg";
-		document.getElementById("post_sx").innerHTML = "PESO Posteriore sinistra: " + JSON.parse(event.data).post_sx + " kg";
-		document.getElementById("post_dx").innerHTML = "PESO Posteriore destra: " + JSON.parse(event.data).post_dx + " kg";
-	}
-};
-
 connected = false;
 document.getElementById("btn").onclick = function() {
 	document.getElementById("btn").disabled = true;
-	if(connected) {
-		AlchemyServer.Stop();
+	if(socket && connected) {
+		socket.close();
 		document.getElementById("btn").innerHTML = "Disconnecting...";
 	}
 	else
 	{
 		document.getElementById("btn").innerHTML = "Connecting...";	
 		
-		AlchemyServer = new Alchemy({ 
-			Server: "localhost",
-			Port: document.getElementById("port").value,
-			SocketType: 'websocket',
-			DebugMode: false
-		});	
-		AlchemyServer.Connected = function(){
+		socket = new WebSocket('ws://localhost:' + document.getElementById("port").value);
+		socket.onopen = function(){
 			document.getElementById("status").innerHTML = "Status: connected";
 			console.log("\nconnected");
 			connected = true;
@@ -111,7 +58,7 @@ document.getElementById("btn").onclick = function() {
 			document.getElementById("post_sx2").innerHTML = "BORLOTTO Posteriore sinistra: 0";
 			document.getElementById("post_dx2").innerHTML = "BORLOTTO Posteriore destra: 0";
 		};
-		AlchemyServer.Disconnected = function(){
+		socket.onclose = function(){
 			document.getElementById("status").innerHTML = "Status: disconnected";
 			console.log("\ndisconnected");
 			connected = false;
@@ -119,7 +66,7 @@ document.getElementById("btn").onclick = function() {
 			document.getElementById("btn").disabled = false;
 			//document.getElementById("time").innerHTML = "";
 		};
-		AlchemyServer.MessageReceived = function(event){
+		socket.onmessage = function(event){
 			console.log(event.data);
 			//document.getElementById("ID").innerHTML = "ID: " + JSON.parse(event.data).ID;
 			if(JSON.parse(event.data).borlotto) {
@@ -135,22 +82,17 @@ document.getElementById("btn").onclick = function() {
 				document.getElementById("post_dx").innerHTML = "PESO Posteriore destra: " + JSON.parse(event.data).post_dx + " kg";
 			}
 		};
-		try {
-			AlchemyServer.Start();
-		} catch(err) {
-			alert("Unable to reach the server: " + err);
-		}
 	}
 }
 
 document.getElementById("btn2").onclick = function() {
 	if(connected) {
-		AlchemyServer.Send("BIlancia");
+		socket.send("BIlancia");
 	}
 }
 document.getElementById("btn3").onclick = function() {
 	if(connected) {
-		AlchemyServer.Send("borLotto");
+		socket.send("borLotto");
 	}
 }
 </script>

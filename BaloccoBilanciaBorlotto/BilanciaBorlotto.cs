@@ -15,12 +15,12 @@ namespace BaloccoBilanciaBorlotto
 {
     public class BilanciaBorlotto
     {
-        public int WebSocketServerPort { get; private set; }
         private static Logger logger = LogManager.GetLogger("myLogger");
          
         private HashSet<UserContext> _bilanciaUsers, _borlottoUsers;
         private object _lockBilancia, _lockBorlotto;
         private WebSocketServer _wsServer;
+        private int _webSocketServerPort;
         private Thread _thServer, _thBilanciaConsumer, _thBorlottoConsumer;
         private AutoResetEvent _stopServerEvent;
         private volatile bool _run, _runBilancia, _runBorlotto;
@@ -29,7 +29,7 @@ namespace BaloccoBilanciaBorlotto
         public bool IsRunning { get { return _run; } }
         public Action<bool> RunEvent;  
        
-        public BilanciaBorlotto(BilanciaSettings settings)
+        public BilanciaBorlotto(int servePort, BilanciaSettings settings)
         {
             _run = false;
             _bilanciaUsers = new HashSet<UserContext>();
@@ -38,8 +38,9 @@ namespace BaloccoBilanciaBorlotto
             _lockBorlotto = new object();
             _bilanciaProducer = new BilanciaProducer(settings);
             _stopServerEvent = new AutoResetEvent(false);
+            _webSocketServerPort = servePort;
 
-            _wsServer = new WebSocketServer(WebSocketServerPort, IPAddress.Loopback)
+            _wsServer = new WebSocketServer(_webSocketServerPort, IPAddress.Loopback)
             {
                 OnConnected = OnConnect,
                 OnDisconnect = OnDisconnect,
@@ -51,8 +52,8 @@ namespace BaloccoBilanciaBorlotto
 
         public static void Main(string[] args)
         {
-            BilanciaBorlotto bb = new BilanciaBorlotto(new BilanciaSettings());
-            bb.Start(81);
+            BilanciaBorlotto bb = new BilanciaBorlotto(81, new BilanciaSettings());
+            bb.Start();
 
             Thread thGUI = new Thread(() =>    // Thread "gui"
             {
@@ -74,24 +75,63 @@ namespace BaloccoBilanciaBorlotto
 
         }
 
-        public void Start(int serverPort)
+        public void ChangeSettings(int? serverPort = null, BilanciaSettings newSettings = null)
+        {
+            if(serverPort != null && serverPort != _webSocketServerPort)
+            {
+                _webSocketServerPort = (int)serverPort;
+                if (_run)
+                {
+                    _stopServerEvent.Set();
+                    if (_thServer != null)
+                    {
+                        _thServer.Join();
+                        RunEvent?.Invoke(false);
+                        _thServer = null;
+                    }
+                    _wsServer = new WebSocketServer(_webSocketServerPort, IPAddress.Loopback)
+                    {
+                        OnConnected = OnConnect,
+                        OnDisconnect = OnDisconnect,
+                        OnReceive = OnReceive,
+                        //FlashAccessPolicyEnabled = false,
+                        TimeOut = new TimeSpan(10, 0, 0)
+                    };
+                    _thServer = new Thread(() =>
+                    {
+                        _wsServer.Start();
+                        RunEvent?.Invoke(true);
+                        Log(LogLevel.Debug, $"started (port: {_wsServer.Port.ToString()})");
+                        _stopServerEvent.WaitOne();
+                        _wsServer.Stop();
+                        _wsServer.Dispose();
+                        Log(LogLevel.Debug, $"stopped (port: {_wsServer.Port.ToString()})");
+                    });
+                    _thServer.Name = "Listener";
+                    _thServer.Start();
+                }
+            }
+        }
+
+        public void Start()
         {
             if (_run) return;
 
             _run = true;
             _runBilancia = false;
             _runBorlotto = false;
-            WebSocketServerPort = serverPort;
             _stopServerEvent.Reset();
 
-            _wsServer.Port = WebSocketServerPort;
             _thServer = new Thread(() =>
                 {
-                    Log(LogLevel.Debug, "started");
                     _wsServer.Start();
+                    //RunEvent?.Invoke(true);
+                    Log(LogLevel.Debug, $"started (port: {_wsServer.Port.ToString()})");
                     _stopServerEvent.WaitOne();
                     _wsServer.Stop();
-                    Log(LogLevel.Debug, "stopped");
+                    _wsServer.Dispose();
+                    //RunEvent?.Invoke(false);
+                    Log(LogLevel.Debug, $"stopped (port: {_wsServer.Port.ToString()})");
                 });
             _thServer.Name = "Listener";
 

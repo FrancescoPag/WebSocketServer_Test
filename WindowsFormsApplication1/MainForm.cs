@@ -20,17 +20,18 @@ namespace WindowsFormsApplication1
         public MainForm()
         {
             InitializeComponent();
-            _bilanciaBorlotto = new BilanciaBorlotto(Program.Settings.bilanciaSettings);
+            _bilanciaBorlotto = new BilanciaBorlotto(Program.Settings.ServerPort, Program.Settings.BilanciaSettings);
             _bilanciaBorlotto.RunEvent += LoadRunningStatus;
 
             // TODO gestione cambiamento settings?
-            Program.SettingsChanged += () =>    
+            Program.SettingsChanged += () =>
             {
-                Task.Run(() => 
+                Task.Run(() =>
                 {
-                    bool wasRunning = _bilanciaBorlotto.IsRunning;
-                    this._bilanciaBorlotto.Stop();
-                    if (wasRunning) _bilanciaBorlotto.Start(Program.Settings.serverPort);
+                    _bilanciaBorlotto.ChangeSettings(Program.Settings.ServerPort);
+                    //bool wasRunning = _bilanciaBorlotto.IsRunning;
+                    //this._bilanciaBorlotto.Stop();
+                    //if (wasRunning) _bilanciaBorlotto.Start(Program.Settings.serverPort);
                 });
             };
 
@@ -39,6 +40,7 @@ namespace WindowsFormsApplication1
             {
                 await Task.Run(() => this._bilanciaBorlotto.Stop());
                 forceClosing = true;
+                notifyIcon.Visible = false;
                 this.Close();
                 Application.Exit();
             }));
@@ -63,7 +65,7 @@ namespace WindowsFormsApplication1
             if (_bilanciaBorlotto.IsRunning)
                 Task.Run(() => _bilanciaBorlotto.Stop());
             else
-                Task.Run(() => _bilanciaBorlotto.Start(Program.Settings.serverPort));
+                Task.Run(() => _bilanciaBorlotto.Start());
             btnRun.Enabled = false;
         }
 
@@ -81,14 +83,8 @@ namespace WindowsFormsApplication1
             if (!forceClosing)
             {
                 e.Cancel = true;
-                MinimizeToTray();
+                this.Hide();
             }
-        }
-
-        private void MinimizeToTray()
-        {
-            notifyIcon.Visible = true;
-            this.Hide();
         }
 
         private void LoadRunningStatus(bool isRunning)
@@ -99,7 +95,7 @@ namespace WindowsFormsApplication1
                 {
                     if (isRunning)
                     {
-                        lblStatus.Text = $"Running (Port {_bilanciaBorlotto.WebSocketServerPort})";
+                        lblStatus.Text = $"Running (Port {Program.Settings.ServerPort})";
                         btnRun.Text = "Stop";
                         notifyIcon.Text = "BilanciaBorlotto - Running";
                     }

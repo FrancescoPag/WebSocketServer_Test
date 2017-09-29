@@ -92,6 +92,7 @@
             this.cbStop.FormattingEnabled = true;
             this.cbStop.Location = new System.Drawing.Point(163, 243);
             this.cbStop.Name = "cbStop";
+            this.cbStop.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.cbStop.Size = new System.Drawing.Size(76, 21);
             this.cbStop.TabIndex = 25;
             // 
@@ -100,6 +101,7 @@
             this.cbParity.FormattingEnabled = true;
             this.cbParity.Location = new System.Drawing.Point(163, 198);
             this.cbParity.Name = "cbParity";
+            this.cbParity.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.cbParity.Size = new System.Drawing.Size(76, 21);
             this.cbParity.TabIndex = 24;
             // 
@@ -118,6 +120,7 @@
             this.tbBaudRate.Name = "tbBaudRate";
             this.tbBaudRate.Size = new System.Drawing.Size(76, 20);
             this.tbBaudRate.TabIndex = 20;
+            this.tbBaudRate.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label9
             // 
@@ -134,6 +137,7 @@
             this.tbDataBits.Name = "tbDataBits";
             this.tbDataBits.Size = new System.Drawing.Size(76, 20);
             this.tbDataBits.TabIndex = 18;
+            this.tbDataBits.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label10
             // 
@@ -159,6 +163,7 @@
             this.tbFrequenza.Name = "tbFrequenza";
             this.tbFrequenza.Size = new System.Drawing.Size(76, 20);
             this.tbFrequenza.TabIndex = 14;
+            this.tbFrequenza.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label7
             // 
@@ -175,6 +180,7 @@
             this.tbCorrPostDx.Name = "tbCorrPostDx";
             this.tbCorrPostDx.Size = new System.Drawing.Size(76, 20);
             this.tbCorrPostDx.TabIndex = 12;
+            this.tbCorrPostDx.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label6
             // 
@@ -191,6 +197,7 @@
             this.tbCorrAntSx.Name = "tbCorrAntSx";
             this.tbCorrAntSx.Size = new System.Drawing.Size(76, 20);
             this.tbCorrAntSx.TabIndex = 10;
+            this.tbCorrAntSx.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label5
             // 
@@ -207,6 +214,7 @@
             this.tbCorrPostSx.Name = "tbCorrPostSx";
             this.tbCorrPostSx.Size = new System.Drawing.Size(76, 20);
             this.tbCorrPostSx.TabIndex = 8;
+            this.tbCorrPostSx.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label4
             // 
@@ -223,6 +231,7 @@
             this.tbCorrAntDx.Name = "tbCorrAntDx";
             this.tbCorrAntDx.Size = new System.Drawing.Size(76, 20);
             this.tbCorrAntDx.TabIndex = 6;
+            this.tbCorrAntDx.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label3
             // 
@@ -239,6 +248,7 @@
             this.tbLetture.Name = "tbLetture";
             this.tbLetture.Size = new System.Drawing.Size(76, 20);
             this.tbLetture.TabIndex = 5;
+            this.tbLetture.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label2
             // 
@@ -275,6 +285,7 @@
             this.tbPort.Name = "tbPort";
             this.tbPort.Size = new System.Drawing.Size(63, 20);
             this.tbPort.TabIndex = 4;
+            this.tbPort.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // button1
             // 

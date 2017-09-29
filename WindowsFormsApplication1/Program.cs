@@ -14,7 +14,7 @@ namespace WindowsFormsApplication1
         private const string RUN_REGISTRY_KEY = @"BilanciaBorlotto";
 
         private static Settings _settings;
-        public static Settings Settings { get { return _settings; } set { _settings = value; SettingsChanged?.Invoke(); } }
+        public static Settings Settings { get { return _settings; } set { _settings = value; SaveSettings(); } }
         public static Action SettingsChanged;
 
         [STAThread]
@@ -23,23 +23,29 @@ namespace WindowsFormsApplication1
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Settings = Settings.Load();
-            SaveAutoStartSetting();
+            SaveAutoStartSetting();     // a primo avvio metto subito autostart
             Application.Run(new MainForm());
-            //Task.Run(() => BilanciaBorlotto.Start());
         }
 
-        public static void SaveAutoStartSetting()
+        private static void SaveSettings()
         {
-            if (Settings.autoStart != IsAutoStartEnabled())
+            _settings.Save();
+            SaveAutoStartSetting();
+            SettingsChanged?.Invoke();
+        }
+
+        private static void SaveAutoStartSetting()
+        {
+            if (Settings.AutoStart != IsAutoStartEnabled())
             {
-                if (Settings.autoStart)
-                    SetAutoStart();
+                if (Settings.AutoStart)
+                    EnableAutoStart();
                 else
-                    UnSetAutoStart();
+                    DisableAutoStart();
             }
         }
 
-        private static void SetAutoStart()
+        private static void EnableAutoStart()
         {
             RegistryKey key = Registry.CurrentUser.CreateSubKey(RUN_LOCATION);
             key.SetValue(RUN_REGISTRY_KEY, System.Reflection.Assembly.GetExecutingAssembly().Location);
@@ -58,7 +64,7 @@ namespace WindowsFormsApplication1
             return (value == System.Reflection.Assembly.GetExecutingAssembly().Location);
         }
 
-        private static void UnSetAutoStart()
+        private static void DisableAutoStart()
         {
             RegistryKey key = Registry.CurrentUser.CreateSubKey(RUN_LOCATION);
             key.DeleteValue(RUN_REGISTRY_KEY);

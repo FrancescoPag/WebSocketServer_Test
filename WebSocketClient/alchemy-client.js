@@ -79,7 +79,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     Start: function() {
       var server = 'ws://' + this._options.Server + ':' + this._options.Port + '/' + this._options.Action + '/' + this._options.SocketType;
       var ACInstance = this;
-      this._socket = new WebSocket(server);
+	  // try {
+		this._socket = new WebSocket(server);
+	  // } catch(err) {
+		  // alert("Error: " + err);
+	  // }
       this._socket.onopen = function() { ACInstance._OnOpen(); };
       this._socket.onmessage = function(data) { ACInstance._OnMessage(data); };
       this._socket.onclose = function() { ACInstance._OnClose(); };
